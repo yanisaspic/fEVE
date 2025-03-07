@@ -1,6 +1,6 @@
 Package: feve
 Title: An Alternative Framework to -Omics Ensemble Clustering
-Version: 0.0.0.9000
+Version: 1.0
 Authors@R: 
     person("Yanis", "Asloudj", , "yanis.asloudj@u-bordeaux.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0003-5440-6268"))
