@@ -6,8 +6,6 @@ Instead of minimizing the differences of multiple clustering results generated w
 Currently, one instance of the fEVE framework has been implemented:
     - scEVE: an instance that analyzes single-cell transcriptomics datasets, using four clustering methods.
 
-fEVE is maintained by Asloudj Yanis [yanis.asloudj@u-bordeaux.fr].
-
 ## Installation
 
 You can install fEVE from Github with:
@@ -20,3 +18,4 @@ devtools::install_github("yanisaspic/fEVE", dependencies=TRUE)
 ## Overview of the fEVE framework
 
 A complete overview of the framework is available in its associated vignette.
+An overview of the on-demand benchmark of our framework is also available in a vignette.
