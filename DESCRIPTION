@@ -1,0 +1,70 @@
+Package: feve
+Title: An Alternative Framework to -Omics Ensemble Clustering
+Version: 0.0.0.9000
+Authors@R: 
+    person("Yanis", "Asloudj", , "yanis.asloudj@u-bordeaux.fr", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0003-5440-6268"))
+Description: fEVE is an alternative approach to integrate multiple clustering results, generated with -omics datasets.
+    Instead of minimizing the differences of multiple clustering results generated with a panel of methods,
+    fEVE describes these differences, and it leverages them to identify clusters that are robust to the method used.
+License: GPL-3 + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.0
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Imports: 
+    aricode,
+    arules,
+    assertthat,
+    bluster,
+    clues,
+    colorspace,
+    densitycut,
+    dplyr,
+    forcats,
+    ggplot2,
+    ggplotify,
+    ggtree,
+    ggVennDiagram,
+    glue,
+    grDevices,
+    gridExtra,
+    igraph,
+    monocle3,
+    openxlsx,
+    patchwork,
+    qpdf,
+    R.utils,
+    rlang,
+    scater,
+    SCpubr,
+    scran,
+    scuttle,
+    sessioninfo,
+    Seurat,
+    SeuratWrappers,
+    SHARP,
+    SingleCellExperiment,
+    SummarizedExperiment,
+    tidytree,
+    TMExplorer,
+    viridis
+Remotes:
+    bioc::3.18/bluster,
+    bioc::3.18/scater,
+    bioc::3.18/scran,
+    bioc::3.18/scuttle,
+    bioc::3.18/SingleCellExperiment,
+    bioc::3.18/SummarizedExperiment,
+    bioc::3.18/TMExplorer,
+    bitbucket::jerry00/densitycut_dev@3878b5f,
+    github::cole-trapnell-lab/monocle3@2b17745,
+    github::satijalab/seurat-wrappers@d28512f,
+    github::shibiaowan/SHARP@b1eddac
+Depends: 
+    R (>= 4.0)
+LazyData: true
+LazyDataCompression: xz

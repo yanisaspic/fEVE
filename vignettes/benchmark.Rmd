@@ -1,0 +1,68 @@
+---
+title: "On-demand benchmark of a fEVE instance"
+author: "Asloudj Yanis"
+date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{On-demand benchmark of a fEVE instance}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+To investigate how the results of a fEVE instance are impacted by the parameters used, a benchmark can be conducted easily.
+We will demonstrate how by using the scEVE instance, an instance dedicated to the analysis of scRNA-seq datasets.
+
+```{r feve}
+library(feve)
+```
+
+A collection of datasets is available to evaluate the scEVE instance.
+They are listed in the function `sceve_GetDatasets()`, and each individual dataset is loaded with the function `sceve_LoadData()`.
+They correspond to scRNA-seq datasets of raw counts with more than a 100 samples, available with the package `TMExplorer` [@christensen2022].
+
+```{r get_datasets}
+sceve_GetDatasets()
+```
+
+The function `get_benchmark()` is called to evaluate the clustering performance of a fEVE instance, with a specific set of parameters.
+
+```{r get_benchmark}
+data <- sceve_LoadData("Darmanis_HumGBM")
+params <- get_parameters("scEVE")
+benchmark <- get_benchmark(data, params, "scEVE")
+```
+
+It returns a table with 9 columns:
+
+-   `method` and `dataset` indicate which set of fEVE parameters, and which dataset was employed.
+-   `time (s)` and `peak_memory_usage (Mb)` measure the computational performance of the instance. Here, lower is better.
+-   `ARI` and `NMI` are extrinsic measurements of the clustering performance of the instance. They compare the cluster predictions to the annotations of the authors of the dataset. They are calculated with the package `aricode` [@chiquet2024]. Here, higher is better, and the maximum is 1.
+-   `nPurity` and `SI` are intrinsic measurements of the clustering performance of the framework. They compare the molecular signal (here, the gene expression) of samples in and out of their clusters. They are calculated with the package `bluster` [@lun2024]. Here, higher is better, and the maximum is 1.
+
+From this table, a lot of information can be learned regarding different instances of the fEVE framework :
+
+```{r benchmark}
+benchmark
+```
+
+Here, we can see that three methods were benchmarked.
+The first method `scEVE` corresponds to the fEVE instance we have input.
+We have manually labeled it this way, when we have called `get_benchmark()`.
+The second method is `scEVE*`, with an asterisk; it is identical to `scEVE`, except that the leftover clusters are filtered out when the clustering performance is measured. Because of that, both methods share the same computational performance metrics. 
+
+Finally, the third method is `ground_truth`; it corresponds to the clusters predicted by the authors of the dataset. Obviously, because the `ARI` and the `NMI` are based on the ground truth, their value is 1 (the maximum). We also cannot measure computational performance metrics for the `ground_truth`.
+
+Here, with the dataset `Darmanis_HumGBM`, we see that both `scEVE` and `scEVE*` have a higher intrinsic clustering performance than `ground_truth`, with `scEVE*` having the highest clustering performances.
+It would indicate that, on this dataset, the molecular signal of the clusters predicted with the fEVE framework are more cohesive than the molecular signal of the clusters proposed by the authors.
+
+Regardless of this specific outcome, we expect developers to take full advantage of this open framework and its on-demand benchmark to explore and evaluate different instances of our original ensemble framework.

@@ -1,0 +1,502 @@
+---
+title: "Overview of the fEVE framework"
+author: "Asloudj Yanis"
+date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Overview of the fEVE framework}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+bibliography: references.bib
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+# fEVE framework tutorial
+
+In this tutorial, we will use the fEVE framework to conduct a clustering analysis on an -omics dataset.
+Specifically, we will use the scEVE instance of our framework, which is an an instance dedicated to the analysis of scRNA-seq datasets.
+We will attempt to analyze a public human glioblastoma dataset.
+
+### Setup the library
+
+The fEVE framework uses R packages from multiple repositories (e.g. CRAN, Bioconductor, Github).
+The exhaustive list of dependencies, as well as their versions, are available at the bottom of this overview, in the final section **Session information**.
+
+```{r library}
+library(feve)
+```
+
+### Load the dataset
+
+The data used in this vignette was published by Darmanis *et al.* [@darmanis2017].
+The dataset contains 3,589 samples extracted from the core and the peripheral tissues of human glioblastoma tumors.
+These samples were sequenced with a SMART-Seq2 protocol, and the expression of up to 23,459 genes was measured.
+After analyzing the data, Darmanis *et al.* were able to identify 7 unique cell types: astrocytes, immune cells, neoplastic cells, neurons, oligodendrocytes, vascular cells and OPCs (oligodendrocyte precursor cells).
+
+```{r dataset}
+data <- sceve_LoadData("Darmanis_HumGBM")
+dataset_init <- data$dataset
+ground_truth <- data$ground_truth
+dim(dataset_init)
+unique(ground_truth)
+```
+
+The loaded `data` include the scRNA-seq expression matrix `dataset`, and the cell types identified by Darmanis *et al.* `ground_truth`.
+
+The rows of the expression matrix represent features, and its columns represent samples.
+The scEVE instance should be applied on raw count matrices formatted similarly.
+**Note** that these matrices should also include **more than 100 cells**; otherwise, the instance won't attempt to divide them.
+
+### Conduct a full fEVE clustering analysis
+
+The function `get_parameters()` is used to load the parameters of the scEVE instance.
+Afterwards, the entire clustering analysis can be conducted by calling the function `feve()`.
+
+```{r run}
+params <- get_parameters("scEVE")
+results <- feve(dataset_init, params=params)
+```
+
+The results of the `feve()` function is a list with two elements: `records` and `preds`.
+
+`records` is a named list, with four data.frames: `samples`, `features`, `meta` and `methods`:
+
+-   `samples` associates samples to their clusters, across multiple resolutions.
+
+-   `features` associates clusters to their characteristic features.
+
+-   `meta` associates clusters to their robustness, as well as other generic information.
+
+-   `methods` associates clusters to the clustering methods used to predict them.
+
+When the scEVE instance is used, samples correspond to cells and features correspond to genes.
+
+```{r records$samples}
+head(results$records$samples, 100)
+```
+
+By looking at `records$samples`, we see that every sample belongs to the cluster `C` (indicated by the value `1`).
+By conducting successive clustering recursions, the framework assigned samples to smaller sub-clusters progressively.
+For instance, most of the astrocyte cells are grouped together in the cluster `C.L.L.1`, which is a sub-part of the clusters `C.L.L` and `C.L` (both are leftover clusters, indicated by the final `L` character).
+We can also see that most of the immune cells are grouped in the cluster `C.3`.
+
+```{r records$features}
+head(results$records$features, 100)
+```
+
+Looking at `records$features`, we can identify marker genes for each predicted clusters.
+These marker genes are genes with a high log2-fold change expression (log2FC\>4), and the values reported in the table correspond to their log2-fold changes.
+
+```{r records$meta}
+results$records$meta
+```
+
+`records$meta` indicate the size, the robustness as well as the parent population of every predicted cluster.
+Clusters with a robustness superior to 0 are **robust clusters** (*i.e.* clusters predicted by multiple methods), whereas clusters with a robustness of 0 are **leftover clusters** (*i.e* cells unassigned to robust clusters).
+
+```{r records$methods}
+results$records$methods
+```
+
+The table `records$methods` is used to explain which clustering methods contributed to the prediction of a robust cluster.
+Here for instance, we can see that `densityCut` [@ding2016], `monocle3` [@cao2019] and `Seurat` [@hao2021] all predicted the cluster `C.1`, composed of oligodendrocyte cells.
+The cluster `C.3`, mainly composed of immune cells, was predicted by `densityCut` [@ding2016], `monocle3` [@hao2021] and `SHARP` [@wan2020].
+
+```{r preds}
+set.seed(1)
+sample(results$preds, size=10)
+```
+
+`preds` corresponds to the most informative cluster labels (*i.e.* the ones with the highest resolution) predicted by the framework for every sample in the dataset.
+Basically, the type of output you would get from using any clustering method.
+
+We can see that the cell `Immune cell_1834` was assigned to the cluster `C.3`, whereas the cell `Neoplastic_233` was assigned to the cluster `C.L.L.L`.
+
+Finally, a summary figure can be drawn, with the `get_summary_plot()` function. Due to limitation in space, it might appear squashed in the vignette.
+
+```{r get_summary_plot}
+p <- get_summary_plot(results$records)
+p
+```
+
+The plot is composed of 3 elements (from left to right): a tree representing the different resolutions of clusters, a middle barplot representing the sizes of the most informative clusters, and a right barplot representing the number of characteristic features (and the most characteristic feature) of these clusters.
+
+### Parameters of a fEVE clustering analysis
+
+The function `feve()` has 3 supplementary arguments:
+
+-   `figures` is a boolean that indicates if plots should be drawn and saved to explain the clustering recursions.
+
+-   `sheets` is a boolean that indicates if the results of the fEVE clustering analysis should be saved in spreadsheets.
+
+-   `params` is a named list of parameters required to conduct a fEVE clustering analysis.
+
+By default, the function `get_parameters()` is called to to get an instance of the fEVE framework.
+
+```{r parameters}
+params <- get_parameters("scEVE")
+names(params)
+```
+
+These parameters include:
+
+-   `random_state`, the integer seed used to have deterministic results.
+
+-   `minimum_samples`, the minimum number of samples expected in a population before attempting to sub-cluster it.
+
+-   `figures_path` & `sheets_path`, the default paths where figures and result sheets are stored, respectively.
+
+-   `selected_features_strategy`, `base_clusters_strategy`, `characteristic_features_strategy`, `characterized_clusters_strategy` and `cluster_memberships_strategy`, which are modular functions called by the fEVE framework.
+    These parameters are mostly aimed at developers.
+    They are briefly mentioned when relevant in the following section **Focus on a single clustering recursion of fEVE.** They are extensively presented in the penultimate section **Open framework for developers**.
+
+# Focus on a single clustering recursion of fEVE
+
+The fEVE clustering framework automatically conducts multiple clustering recursions.
+To better understand this framework, we will conduct a single clustering recursion manually, and we will detail it.
+Darmanis' dataset will be used here too.
+
+First, we need to define some supplementary variables.
+They are defined prior to the first clustering recursion, when `feve()` is called.
+
+```{r init}
+data <- sceve_LoadData("Darmanis_HumGBM")
+dataset_init <- data$dataset
+params <- get_parameters("scEVE")
+
+population <- "C"
+records <- initialize_records(dataset_init)
+SeuratObject_init <- get_SeuratObject_init(dataset_init)
+```
+
+`SeuratObject.init` will be used to draw some plots during the clustering analysis.
+`population` is used to indicate which pool of samples fEVE should attempt to divide during its clustering recursion.
+The first recursion is always conducted on the the population `C`, which corresponds to all the samples of the dataset.
+**Note** that `records` is the variable used to **store the results of each clustering recursion**; it is initialized at the start of the framework, and is enriched progressively.
+
+### Overview of a clustering recursion
+
+A single clustering recursion with the fEVE framework is composed of four consecutive steps:
+
+1.  the **data selection**, where a subset of the dataset is selected.
+    fEVE will attempt to divide this subset of samples during the clustering recursion.
+
+2.  the **prediction of base clusters**, where multiple clustering methods are applied on the extracted data.
+
+3.  the **identification of robust clusters**, where robust clusters (*i.e.* subsets of samples grouped together by multiple methods), and a leftover cluster, are identified.
+
+4.  the **biological characterization of these clusters**, where scEVE attempts to characterize these clusters by detecting specific features.
+
+With the scEVE instance, these characteristic features correspond to marker genes.
+
+If these four steps are completed, the results of the clustering recursion are reported to the variable `records`.
+
+We will detail each step of a clustering recursion below.
+
+### Data extraction
+
+The fEVE framework conducts successive clustering recursions.
+At each recursion, a different pool of samples will be clustered.
+For the first recursion, this pool of samples corresponds to the population `C`, *i.e.* the entire dataset.
+In the following recursions, the pools of samples will correspond to clusters predicted at a previous recursion (*e.g.* population `C.1`).
+
+For each pool of samples, a limited set of features is selected.
+With scEVE, 1,000 highly variable genes are selected.\
+
+*The function defined in `params$selected_features_strategy` is called to select the features.*
+
+The function `get_selected_data()` is called to extract a specific pool of samples, as well as their selected features.
+
+```{r get_selected_data}
+selected_data <- get_selected_data(population, dataset_init, SeuratObject_init, records, params, figures=FALSE)
+dim(dataset_init)
+dim(selected_data$dataset)
+```
+
+By default, when `get_selected_data()` is called, a figure representing samples selected for the clustering recursion is drawn, and saved to `params$figures_path`.
+Here, because we have set `figures=FALSE`, the figure was not drawn.
+We will draw it directly by calling `draw_selected_data()`.
+
+```{r draw_extracted_data}
+draw_selected_data(population, SeuratObject_init, records)
+```
+
+The resulting figure is a U-MAP plot drawn with `SCpubr` [@blanco-carmona2022], where every sample selected for the clustering recursion is darkened.
+Briefly, a U-MAP plot is a projection of samples on a 2D plan.
+Here, every sample projected is darkened, because every sample was selected for the clustering recursion (population `C`).
+To better showcase how this figure should be used, we will call `draw_selected_data()` on a different clustering recursion, later.
+
+As a result of the **data selection** step, a pool of samples with a selected set of features is extracted, and multiple clustering methods can be applied on this subset of data.
+
+### Prediction of base clusters
+
+To predict base clusters, fEVE applies multiple clustering methods on the same subset of data.
+In the scEVE instance, these methods are `densityCut` [@ding2016], `monocle3` [@cao2019], `Seurat` [@hao2021] and `SHARP` [@wan2020].
+*The function defined in `params$base_clusters_strategy` is called to apply multiple clustering methods.*
+
+The function `get_base_clusters()` is called to predict base clusters in a subset of samples.
+
+```{r get_base_clusters}
+base_clusters <- get_base_clusters(population, selected_data, params, figures=FALSE)
+head(base_clusters)
+```
+
+We see that different clustering methods yield different clustering results.
+Here for instance, we see that Seurat has grouped the samples `Neoplastic_1` and `Neoplastic_2` separately from the samples `Neoplastic_3`, `Neoplastic_4`\` and `Neoplastic_5`, whereas monocle3 has grouped them together.
+
+To better explore these independent clustering results, a figure representing the base clusters is drawn and saved to `params$figures_path`.
+Here, because we have set `figures=FALSE`, the figure was not drawn.
+We will draw it directly by calling `draw_base_clusters()`.
+
+```{r draw_base_clusters}
+p <- draw_base_clusters(selected_data$SeuratObject, base_clusters)
+```
+
+The comparison of these U-MAP plots drawn with `SCpubr` [@blanco-carmona2022] reveals the striking differences between clustering results, with regards to the number of clusters, as well as their respective boundaries.
+
+**Note** that for each clustering recursion, because the pool of features exploited at each recursion varies, the cell projections on these U-MAP plots can differ from the ones generated with `draw_extracted_data()`.
+
+Following the **prediction of base clusters** with multiple methods, fEVE identifies **robust clusters**, *i.e.* subsets of samples grouped together by multiple methods.
+
+### Identification of robust clusters
+
+The fEVE framework quantifies the similarity of every pair of predicted clusters, according to the samples grouped in both clusters.
+From these similarities, we define strongly similar clusters as clusters that share the majority of their samples, and we draw a graph where every node is a cluster, and every edge connects two strongly similar clusters.
+The edges are weighted according to the similarity measured.
+
+**Note** that the frequent itemset mining framework is used to quantify the pairwise similarities between base clusters.
+
+The drawn graph is disjoint, and every sub-graph (*i.e.* every connected component) indicates that a subset of samples has been grouped together by multiple clustering methods.The sub-graphs can have multiple structures ; for instance, if every method were to predict the exact same cluster, the resulting sub-graph would be a dense graph, where every edge is weighted 1.
+
+By comparing the structure of each sub-graph to this theoretical structure, the robustness of a cluster can be quantified (from 0 to 1).
+Any sub-graph with a robustness inferior to a threshold value is filtered out.
+The threshold corresponds to the minimum robustness observed when the majority of the clustering methods predict a similar cluster (*i.e.* 0.25 robustness for 4 clustering methods).
+For every sub-graph that has not been filtered out, the samples at the intersection of every base cluster will be grouped to form a robust cluster.
+We can retrieve them by calling the function `get_robust_clusters()`.
+
+```{r get_robust_clusters}
+robust_clusters <- get_robust_clusters(population, base_clusters, selected_data, records, params, figures=FALSE)
+print(robust_clusters[[1]])
+```
+
+Robust clusters are sorted by decreasing robustness.
+Here, our most robust cluster is composed of 80 oligodendrocyte cells, grouped together by three different clustering methods: densityCut, monocle3 and Seurat.
+We label this meta-cluster `C.1`: it is the 1st most robust cluster predicted from the population `C`.
+The second most robust cluster will be labeled `C.2`, the third `C.3`, etc.
+
+```{r draw_robust_clusters}
+p <- draw_robust_clusters(robust_clusters, selected_data)
+p
+```
+
+The composite U-MAP plots drawn with `SCpubr` [@blanco-carmona2022] show the robust clusters predicted, as well as their respective robustness.
+For instance, `C.1` has a robustness of 0.49, and its samples are projected in the bottom-left red blob.
+**Note** that some robust clusters might appear missing in the combined plot due to color overlaps.
+
+After **identifying the robust clusters**, fEVE attempts to characterize them.
+
+### Biological characterization of the clusters
+
+Samples unassigned to a robust cluster are grouped together in a **leftover cluster**, with a null robustness.
+
+In order to facilitate downstream biological analyses, fEVE predicts characteristic features for each these clusters.
+In the scEVE instance, the function `FindMarkers()` of the `Seurat` package is used to identify marker genes.\
+
+*The function defined in `params$characteristic_features_strategy` is called to predict characteristic features in every cluster.*
+
+After identifying characteristic features in each cluster, fEVE attempts to identify **characterized clusters**.
+In the scEVE instance, characterized clusters are defined as clusters with 10 marker genes.
+Robust clusters insufficiently characterized are merged to the leftover cluster, so as to prevent over-clustering, and a new attempt at characterizing it is conducted.\
+
+*The function defined in `params$characterized_clusters_strategy` is called to filter out uncharacterized clusters.*
+
+The detection of characteristic features, and the subsequent identification of characterized clusters, are both conducted by calling the function `get_characterized_clusters()`.
+
+```{r get_characterized_clusters}
+characterized_clusters <- get_characterized_clusters(population, robust_clusters, selected_data, params, figures=FALSE)
+print(characterized_clusters$C.3$features)
+```
+
+Here, we can see the marker genes predicted for the meta-cluster `C.3`, as well as their log2 fold changes.
+
+To summarize this information, a figure representing the characteristic features predicted in each characterized cluster is drawn in `params$figures_path`.
+Here, because we have set `figures=FALSE`, the figure was not drawn.
+We will draw it directly by calling `draw_characteristic_features()`.
+
+```{r draw_characteristic_features}
+p <- draw_characteristic_features(characterized_clusters)
+p
+```
+
+The resulting upset-plot drawn with `ggVennDiagram` [@gao2021; @gao2024] is divided into a left and a right component.
+On the left, a bar-plot indicates the number of characteristic features predicted in each cluster.
+By exploiting the bar-plot, we see that `C.1` has 90 marker genes, whereas the leftover cluster `C.L` has more than 140.
+On the right, a bar-plot and a grid-plot report the distribution of characteristic features across clusters.
+For instance, the second bar of the plot is associated to a single `C.2` dot on the grid.
+By leveraging both plots, we can learn that the cluster `C.2` has 53 specific marker genes.
+The fifth bar, which is associated to `C.1` and `C.2` on the grid, inform us that the two clusters share 0 marker genes.
+
+The **biological characterization of the clusters** is the last step of the clustering recursion.
+
+### End of a clustering recursion
+
+#### Results' report
+
+As a result of this last step, either (1) two or more clusters biologically distinct from each other were predicted (they are stored in `characterized_clusters`), or (2) no two clusters biologically distinct from each other were predicted, and the variable `characterized_clusters` is an empty list.
+
+-   In the first case, the fEVE framework was able to sub-divide a pool of samples into multiple homogeneous clusters.
+    Consequently, it will automatically conduct novel and independent clustering recursions to further sub-divide these predicted clusters.
+    **Note** that for each of these clustering recursions, **the robustness threshold used to identify robust clusters will be updated**, so that sub-clusters are predicted if, and only if, they are more robust than their parent cluster.
+
+-   In the second case, the fEVE framework was unable to sub-divide a pool of samples into multiple homogeneous clusters, and it will consider that the population as a whole is homogeneous, so as to prevent over-clustering.
+
+In any case, the information stored in `characterized_clusters` (*i.e.* the clusters predicted, their robustness as well as their characteristic features) are reported in the variable `records`.
+
+By default, the clusters predicted are reported in a binary matrix, so that the value *i,j* is 1 if the sample *i* belongs to the cluster *j*, or 0 otherwise. This is done with the function `feve_HardClustering()`.
+*The function defined in `params$cluster_memberships_strategy` is called to report the cluster memberships of every sample.*
+
+The entire process is conducted by calling the function `get_recorded_recursion()`.
+
+```{r report_recursion}
+records <- get_recorded_recursion(population, characterized_clusters, selected_data, records, params)
+```
+
+At every recursion, the contents of the variable `records` are saved to an .xlsx file, in `params$sheets_path`.
+The informative figures generated during the recursion are merged together in a single .pdf file named after the population clustered (*e.g.* `C.pdf`) and saved in `params$figures_path`.
+
+Finally, after reporting the results of the clustering analysis, the `clustering_status` of the investigated population (in `records$meta`) is updated from `PENDING` to `DONE`.
+
+#### Next recursion
+
+We can see below a sub-population predicted at the previous clustering recursion.
+
+```{r next_recursion}
+draw_selected_data("C.2", SeuratObject_init, records)
+```
+
+Here, unlike the first time we ran `draw_selected_data()`, only a subset of samples is darkened.
+They correspond to the samples in the population `C.2`, and fEVE will attempt to sub-divide them with a new clustering recursion.
+Because `C.2` had a robustness of 0.40, in this new recursion, robust clusters will correspond to groups of samples with a robustness greater than 0.40.
+
+Eventually, fEVE won't be able to identify robust clusters, and the `clustering_status` of every predicted population will be set to `DONE`.
+At this point, the clustering analysis is over, and results with multiple cluster resolutions and explicit robustness values will be generated.
+
+# Open framework for developers
+
+The fEVE framework is a modular framework: it allows developers to customize their clustering analyses.
+In the previous section, we have presented a clustering recursion with the scEVE instance,
+dedicated to single-cell transcriptomic analyses.
+However, the functions called to conduct the clustering recursion can be changed easily.
+To do that, we just need to change `_strategy` parameters in the variable `params`.
+
+```{r params}
+names(params)
+```
+
+In this section, we present each `_strategy` parameter, with its expected inputs and outputs.
+We also illustrate how different thresholds or functions can be implemented in the framework, in the subsection **selected_features_strategy**.
+
+### selected_features_strategy
+
+This parameter expects a function that selects a limited pool of features for a clustering recursion.
+It is called by `get_selected_data()`, and it expects two positional arguments: `dataset` and `params`, respectively.
+It outputs a vector of features.
+
+In the scEVE instance, it is set to `sceve_GetSelectedFeatures()`, and the n most variable genes in a scRNA-seq dataset are selected, with n=1000.
+
+```{r params$selected_features_strategy}
+print(params$selected_features_strategy)
+```
+
+We see that `n_genes=1000`, but we can easily select a different number of variable features by defining a novel function and setting it to `params$selected_features_strategy`.
+
+```{r get_selected_data bis}
+f <- function(dataset, params) {sceve_GetSelectedFeatures(dataset, params, n_features=2000)}
+params$selected_features_strategy <- f
+tmp <- get_selected_data(population="C", dataset_init, SeuratObject_init, records, params, figures=FALSE)
+dim(tmp$dataset)
+```
+
+Because we have modified the function set to `params$selected_features_strategy`, the datasets extracted at each recursion of the analysis will now include 2,000 selected features.
+
+Instead of modifying the threshold of variable features, we can also set a completely different function.
+In fact, **any function with the same inputs and output** as the one described, can be set to `params$selected_features_strategy`.
+**This property is true for every function set to a `_strategy` parameter**.
+We believe this will facilitate the use of our framework for different -omics clustering analyses.
+We illustrate this property by defining a new function that selects 1,000 features completely randomly, and we set it to `params$selected_features_strategy`.
+
+```{r data.recursion ter}
+set.seed(1)
+g <- function(dataset, params) {sample(rownames(dataset), size=1000)}
+params$selected_features_strategy <- g
+tmp <- get_selected_data("C", dataset_init, SeuratObject_init, records, params, figures=FALSE)
+dim(tmp$dataset)
+```
+
+### base_clusters_strategy
+
+This parameter expects a function called to predict base clusters with multiple clustering methods.
+It is called by `get_base_clusters()`, and it expects two positional arguments: `selected_data` and `params`, respectively.
+It outputs a data.frame associating samples to their predicted clusters; its rows are samples, its columns are clustering methods, and predicted populations are reported in the table.
+
+In the scEVE instance, it is set to `sceve_GetBaseClusters()`, and four clustering methods are used: densityCut, monocle3, Seurat and SHARP.
+
+```{r params$base_clusters_strategy}
+print(params$base_clusters_strategy)
+```
+
+### characteristic_features_strategy
+
+This parameter expects a function called to predict the characteristic features of a single cluster.
+It is called by `get_characterized_clusters()`, and it expects three positional arguments: `cluster`, `selected_data` and `params`, respectively.
+It outputs a named vector associating features to some metric (e.g. the log2-fold change).
+
+In the scEVE instance, it is set to `sceve_GetCharacteristicFeatures()`, and the function `FindMarkers()` from Seurat is used to identify genes with a high log2 fold change (log2FC\>4) and a low adjusted p-value (p\<0.001).
+
+```{r params$characteristic_features_strategy}
+print(params$characteristic_features_strategy)
+```
+
+### characterized_clusters_strategy
+
+This parameter expects a function called to identify characterized clusters.
+It is called by `get_characterized_clusters()`, and it expects three positional arguments: `clusters`, `selected_data` and `params`, respectively.
+It outputs a list where every element is a pool of samples.
+The elements are named lists, with six names: `base_clusters`, `samples`, `clustering_methods`, `label`, `features` and `robustness`.
+
+In the scEVE instance, it is set to `sceve_GetCharacterizedClusters()`, and a characteristic feature threshold is used to identify characterized clusters, with threshold=10.
+
+```{r params$characterized_clusters_strategy}
+print(params$characterized_clusters_strategy)
+```
+
+### cluster_memberships_strategy
+
+This parameter expects a function called to report the cluster memberships of every sample.
+It is called by `get_recorded_recursion()`, and it expects three positional arguments: `characterized_clusters`, `selected_data` and `params`, respectively.
+It outputs a data.frame associating samples to their predicted clusters.
+Its rows are samples, its columns are characterized clusters, and cluster memberships are reported in the table.
+
+By default, it is set to `feve_HardClustering()`, and the cell clusters predicted are reported in a binary matrix, so that the value *i,j* is 1 if the cell *i* belongs to the cluster *j*, or 0 otherwise.
+
+```{r params$cluster_memberships_strategy}
+print(params$cluster_memberships_strategy)
+```
+
+# Session information
+
+```{r sessioninfo}
+library(sessioninfo)
+sessioninfo::session_info()
+```
