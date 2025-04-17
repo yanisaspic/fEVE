@@ -49,17 +49,17 @@ use_monocle3 <- function(selected_SeuratObject, params) {
   return(predictions)
 }
 
-get_formatted_predictions <- function(cells, predictions) {
+get_formatted_predictions <- function(samples, predictions) {
   #' Format the cluster predictions of a method to obtain a standard output.
   #'
-  #' @param cells a vector of cells names.
+  #' @param samples a vector of sample names.
   #' @param predictions a vector of cluster predictions.
   #'
-  #' @return a named factor that associates each cell to their cluster prediction.
+  #' @return a named factor that associates each sample to their cluster prediction.
   #'
   #' @import stats
   #'
-  predictions <- stats::setNames(predictions, cells)
+  predictions <- stats::setNames(predictions, samples)
   predictions <- factor(predictions)
   return(predictions)
 }
