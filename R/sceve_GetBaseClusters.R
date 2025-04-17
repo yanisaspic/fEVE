@@ -77,7 +77,7 @@ use_SHARP <- function(selected_dataset, params) {
   #'
   results <- SHARP::SHARP(scExp=selected_dataset, exp.type="count",
                           n.cores = 1, rN.seed=params$random_state)
-  predictions <- get_formatted_predictions(cells=colnames(selected_dataset),
+  predictions <- get_formatted_predictions(samples=colnames(selected_dataset),
                                            predictions=results$pred_clusters)
   return(predictions)
 }
@@ -96,7 +96,7 @@ use_densityCut <- function(logtpm_dataset, params) {
   set.seed(params$random_state)
   data <- t(logtpm_dataset) # densityCut expects cells as rows and genes as columns.
   results <- densitycut::DensityCut(t(logtpm_dataset), show.plot = FALSE)
-  predictions <- get_formatted_predictions(cells=colnames(logtpm_dataset), predictions=results$cluster)
+  predictions <- get_formatted_predictions(samples=colnames(logtpm_dataset), predictions=results$cluster)
   return(predictions)
 }
 
