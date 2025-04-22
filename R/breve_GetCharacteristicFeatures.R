@@ -3,7 +3,8 @@
 	2025/03/05 @yanisaspic"
 
 get_differential_expression <- function(filtered_dataset, groups) {
-  #' Get the features over-expressed in an in-group (1), with regards to an out-group (0).
+  #' Get the features differentially expressed in an in-group (1),
+  #' with regards to an out-group (0).
   #'
   #' @param filtered_dataset an -omics dataset, with variant features.
   #' Its rows are features and its columns are samples.
@@ -11,7 +12,7 @@ get_differential_expression <- function(filtered_dataset, groups) {
   #'
   #' @import edgeR
   #'
-  #' @return a named vector associating over-expressed features to their log2 fold-changes.
+  #' @return a data.frame associating genes to their log2 fold change and FDR.
   #'
   tmp <- edgeR::DGEList(counts=filtered_dataset, group=groups)
   tmp <- edgeR::estimateDisp(tmp)
@@ -24,7 +25,7 @@ get_differential_expression <- function(filtered_dataset, groups) {
 
 breve_GetCharacteristicFeatures <- function(cluster, selected_data, params,
                                             logFC_threshold=2, pvalue_threshold=0.001) {
-  #' Get over-expressed features by calling the function `FindMarkers` of the edgeR package.
+  #' Get differentially expressed features by calling the function `FindMarkers` of the edgeR package.
   #' Only genes with abs(logFC) > 2 and FDR < 0.001 are returned.
   #'
   #' @param cluster a named lists, with five names:
@@ -49,6 +50,7 @@ breve_GetCharacteristicFeatures <- function(cluster, selected_data, params,
 
   tmp <- get_differential_expression(selected_data$dataset, groups)
   tmp <- tmp[(abs(tmp$logFC)>logFC_threshold) & (tmp$FDR<pvalue_threshold),]
-  characteristic_features <- stats::setNames(tmp$logFC, rownames(tmp))
+  markers <- stats::setNames(tmp$logFC, rownames(tmp))
+  markers <- markers[order(-markers)]
   return(characteristic_features)
 }

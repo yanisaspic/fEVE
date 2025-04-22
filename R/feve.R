@@ -147,8 +147,39 @@ feve_recursion <- function(population, dataset_init, SeuratObject_init, records,
   return(records)
 }
 
+feve_main <- function(population, dataset_init, records, params, figures, sheets) {
+  #' Conduct a clustering analysis with the fEVE framework, starting from a target population.
+  #'
+  #' @param population a character. It corresponds to the population that scEVE will attempt to cluster.
+  #' @param dataset_init a dataset, without selected features.
+  #' Its rows are features and its columns are samples.
+  #' @param records a named list, with four data.frames: `samples`, `features`, `meta` and `methods`.
+  #' @param params a list of parameters (cf. `feve::get_parameters()`).
+  #' @param figures a boolean that indicates if figures should be drawn to explain the clustering recursion.
+  #' @param sheets a boolean that indicates if the results of the clustering recursion should be saved in Excel sheets.
+  #'
+  #' @import openxlsx
+  #'
+  if (figures) {
+    dir.create(params$figures_path)
+    SeuratObject_init <- get_SeuratObject_init(dataset_init)}
+  else {SeuratObject_init <- NA}
+
+  while (!is.na(population)) {
+    print(population)
+    records <- feve_recursion(population, dataset_init, SeuratObject_init, records, params, figures, sheets)
+    population <- get_pending_population(records)}
+
+  feature_is_characteristic <- function(feature) {sum(feature) > 0}
+  records$features <- records$features[apply(X=records$features, MARGIN=1, FUN=feature_is_characteristic),]
+  if (sheets) {openxlsx::write.xlsx(records, params$sheets_path, rowNames=TRUE)}
+
+  results <- list(records=records, preds=factor(get_leaf_clusters(records$samples)))
+  return(results)
+}
+
 feve <- function(dataset_init, params, figures=TRUE, sheets=TRUE) {
-  #' Conduct a clustering analysis with the fEVE framework.
+  #' Conduct a clustering analysis with the fEVE framework, starting from the initial population C.
   #'
   #' @param dataset_init a dataset, without selected features.
   #' Its rows are features and its columns are samples.
@@ -160,32 +191,16 @@ feve <- function(dataset_init, params, figures=TRUE, sheets=TRUE) {
   #' `records` is a named list, with four data.frames: `samples`, `features`, `meta` and `methods`.
   #' `preds` is a named factor associating samples to their predicted clusters.
   #'
-  #' @import openxlsx
-  #'
   #' @export
   #'
   records <- initialize_records(dataset_init)
-
-  if (figures) {
-    dir.create(params$figures_path)
-    SeuratObject_init <- get_SeuratObject_init(dataset_init)}
-  else {SeuratObject_init <- NA}
-
   population <- "C"
-  while (!is.na(population)) {
-    records <- feve_recursion(population, dataset_init, SeuratObject_init, records, params, figures, sheets)
-    population <- get_pending_population(records)}
-
-  feature_is_characteristic <- function(feature) {sum(feature) > 0}
-  records$features <- records$features[apply(X=records$features, MARGIN=1, FUN=feature_is_characteristic),]
-
-  if (sheets) {openxlsx::write.xlsx(records, params$sheets_path, rowNames=TRUE)}
-  results <- list(records=records, preds=factor(get_leaf_clusters(records$samples)))
+  results <- feve_main(population, dataset_init, records, params, figures, sheets)
   return(results)
 }
 
 resume_feve <- function(dataset_init, records, params, figures=TRUE, sheets=TRUE) {
-  #' Resume a clustering analysis with the fEVE framework.
+  #' Conduct a clustering analysis with the fEVE framework, starting from the last pending population.
   #'
   #' @param dataset_init a dataset, without selected features.
   #' Its rows are features and its columns are samples.
@@ -198,24 +213,9 @@ resume_feve <- function(dataset_init, records, params, figures=TRUE, sheets=TRUE
   #' `records` is a named list, with four data.frames: `samples`, `features`, `meta` and `methods`.
   #' `preds` is a named factor associating samples to their predicted clusters.
   #'
-  #' @import openxlsx
-  #'
   #' @export
   #'
-  if (figures) {
-    dir.create(params$figures_path)
-    SeuratObject_init <- get_SeuratObject_init(dataset_init)}
-  else {SeuratObject_init <- NA}
-
   population <- get_pending_population(records)
-  while (!is.na(population)) {
-    records <- feve_recursion(population, dataset_init, SeuratObject_init, records, params, figures, sheets)
-    population <- get_pending_population(records)}
-
-  feature_is_characteristic <- function(feature) {sum(feature) > 0}
-  records$features <- records$features[apply(X=records$features, MARGIN=1, FUN=feature_is_characteristic),]
-
-  if (sheets) {openxlsx::write.xlsx(records, params$sheets_path, rowNames=TRUE)}
-  results <- list(records=records, preds=factor(get_leaf_clusters(records$samples)))
+  results <- feve_main(population, dataset_init, records, params, figures, sheets)
   return(results)
 }

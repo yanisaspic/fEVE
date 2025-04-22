@@ -123,7 +123,8 @@ Basically, the type of output you would get from using any clustering method.
 
 We can see that the cell `Immune cell_1834` was assigned to the cluster `C.3`, whereas the cell `Neoplastic_233` was assigned to the cluster `C.L.L.L`.
 
-Finally, a summary figure can be drawn, with the `get_summary_plot()` function. Due to limitation in space, it might appear squashed in the vignette.
+Finally, a summary figure can be drawn, with the `get_summary_plot()` function.
+Due to limitation in space, it might appear squashed in the vignette.
 
 ```{r get_summary_plot}
 p <- get_summary_plot(results$records)
@@ -363,13 +364,15 @@ As a result of this last step, either (1) two or more clusters biologically dist
 
 In any case, the information stored in `characterized_clusters` (*i.e.* the clusters predicted, their robustness as well as their characteristic features) are reported in the variable `records`.
 
-By default, the clusters predicted are reported in a binary matrix, so that the value *i,j* is 1 if the sample *i* belongs to the cluster *j*, or 0 otherwise. This is done with the function `feve_HardClustering()`.
+By default, the clusters predicted are reported in a binary matrix, so that the value *i,j* is 1 if the sample *i* belongs to the cluster *j*, or 0 otherwise.
+This is done with the function `feve_HardClustering()`.
 *The function defined in `params$cluster_memberships_strategy` is called to report the cluster memberships of every sample.*
 
 The entire process is conducted by calling the function `get_recorded_recursion()`.
 
 ```{r report_recursion}
 records <- get_recorded_recursion(population, characterized_clusters, selected_data, records, params)
+records$meta[population, "clustering_status"] <- "COMPLETE"
 ```
 
 At every recursion, the contents of the variable `records` are saved to an .xlsx file, in `params$sheets_path`.
@@ -389,14 +392,19 @@ Here, unlike the first time we ran `draw_selected_data()`, only a subset of samp
 They correspond to the samples in the population `C.2`, and fEVE will attempt to sub-divide them with a new clustering recursion.
 Because `C.2` had a robustness of 0.40, in this new recursion, robust clusters will correspond to groups of samples with a robustness greater than 0.40.
 
+A complete clustering analysis can also be resumed thanks to the `resume_feve()` function and the `records` variable updated at the previous recursions.
+
+```{r resume_feve}
+results <- resume_feve(dataset_init, records, params, figures=FALSE, sheets=FALSE)
+```
+
 Eventually, fEVE won't be able to identify robust clusters, and the `clustering_status` of every predicted population will be set to `DONE`.
 At this point, the clustering analysis is over, and results with multiple cluster resolutions and explicit robustness values will be generated.
 
 # Open framework for developers
 
 The fEVE framework is a modular framework: it allows developers to customize their clustering analyses.
-In the previous section, we have presented a clustering recursion with the scEVE instance,
-dedicated to single-cell transcriptomic analyses.
+In the previous section, we have presented a clustering recursion with the scEVE instance, dedicated to single-cell transcriptomic analyses.
 However, the functions called to conduct the clustering recursion can be changed easily.
 To do that, we just need to change `_strategy` parameters in the variable `params`.
 

@@ -26,7 +26,7 @@ sceve_GetCharacteristicFeatures <- function(cluster, selected_data, params, logF
 
   Seurat::Idents(object=selected_data$SeuratObject) <- factor(is_in_cluster(samples_of_recursion))
   markers <- Seurat::FindMarkers(selected_data$SeuratObject, ident.1=1)
-  markers <- markers[(markers$avg_log2FC > FC_threshold) & (markers$p_val_adj < pvalue_threshold), ]
+  markers <- markers[(markers$avg_log2FC > logFC_threshold) & (markers$p_val_adj < pvalue_threshold), ]
   markers <- stats::setNames(markers$avg_log2FC, rownames(markers))
   markers <- markers[order(-markers)]
   return(markers)

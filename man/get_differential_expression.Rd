@@ -2,7 +2,8 @@
 % Please edit documentation in R/breve_GetCharacteristicFeatures.R
 \name{get_differential_expression}
 \alias{get_differential_expression}
-\title{Get the features over-expressed in an in-group (1), with regards to an out-group (0).}
+\title{Get the features differentially expressed in an in-group (1),
+with regards to an out-group (0).}
 \usage{
 get_differential_expression(filtered_dataset, groups)
 }
@@ -13,8 +14,9 @@ Its rows are features and its columns are samples.}
 \item{groups}{an ordered vector of integers.}
 }
 \value{
-a named vector associating over-expressed features to their log2 fold-changes.
+a data.frame associating genes to their log2 fold change and FDR.
 }
 \description{
-Get the features over-expressed in an in-group (1), with regards to an out-group (0).
+Get the features differentially expressed in an in-group (1),
+with regards to an out-group (0).
 }
