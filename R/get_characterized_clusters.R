@@ -137,7 +137,9 @@ draw_characteristic_features <- function(characterized_clusters) {
   #'
   get_features.cluster <- function(cluster) {names(cluster$features)}
   features <- sapply(X=characterized_clusters, FUN=get_features.cluster)
-  labels <- sapply(X=characterized_clusters, FUN="[[", "label")
+  has_elements <- function(feats) {length(feats) > 0}
+  features <- Filter(f=has_elements, x=features)
+  labels <- names(features)
   colormap <- generate_color_scale(labels)
 
   # these functions are used to improve the aesthetics of the plots_____________

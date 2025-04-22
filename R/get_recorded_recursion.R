@@ -9,7 +9,7 @@ get_drawings_paths <- function(population, params) {
   #' @param params a list of parameters (cf. `feve::get_parameters()`).
   #'
   #' @return a vector of paths.
-  #' 
+  #'
   #' @import glue
   #'
   drawings_paths <- c()
@@ -68,6 +68,8 @@ report_features <- function(characterized_clusters, records) {
   #' @import stats
   #'
   get_column <- function(cluster) {
+    if (!"features" %in% names(cluster)) {
+      cluster$features <- stats::setNames(rep(0, nrow(records$features)), rownames(records$features))}
     column <- stats::setNames(data.frame(cluster$features), cluster$label)
     column[setdiff(rownames(records$features), rownames(column)),] <- 0
     return(column)}

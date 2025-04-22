@@ -9,7 +9,7 @@ sceve_GetCharacteristicFeatures(
   cluster,
   selected_data,
   params,
-  FC_threshold = 4,
+  logFC_threshold = 4,
   pvalue_threshold = 0.001
 )
 }
@@ -21,7 +21,7 @@ sceve_GetCharacteristicFeatures(
 
 \item{params}{a list of parameters (cf. \code{feve::get_parameters()}).}
 
-\item{FC_threshold}{a numeric.}
+\item{logFC_threshold}{a numeric.}
 
 \item{pvalue_threshold}{a numeric.}
 }
