@@ -170,7 +170,7 @@ feve_main <- function(population, dataset_init, records, params, figures, sheets
     records <- feve_recursion(population, dataset_init, SeuratObject_init, records, params, figures, sheets)
     population <- get_pending_population(records)}
 
-  feature_is_characteristic <- function(feature) {sum(feature) > 0}
+  feature_is_characteristic <- function(feature) {sum(abs(feature)) > 0}
   records$features <- records$features[apply(X=records$features, MARGIN=1, FUN=feature_is_characteristic),]
   if (sheets) {openxlsx::write.xlsx(records, params$sheets_path, rowNames=TRUE)}
 
