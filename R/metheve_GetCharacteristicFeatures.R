@@ -22,7 +22,7 @@ get_differential_methylation <- function(site, filtered_dataset, groups) {
   return(differential_methylation)
 }
 
-medeve_GetCharacteristicFeatures <- function(cluster, selected_data, params,
+metheve_GetCharacteristicFeatures <- function(cluster, selected_data, params,
                                             logFC_threshold=2, pvalue_threshold=0.001) {
   #' Get differentially methylated features by using the Wilcoxon test.
   #' Only sites with abs(logFC) > 2 and FDR < 0.001 are returned.

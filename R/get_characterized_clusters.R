@@ -136,7 +136,7 @@ draw_characteristic_features <- function(characterized_clusters) {
   #' @export
   #'
   get_features.cluster <- function(cluster) {names(cluster$features)}
-  features <- sapply(X=characterized_clusters, FUN=get_features.cluster)
+  features <- lapply(X=characterized_clusters, FUN=get_features.cluster)
   has_elements <- function(feats) {length(feats) > 0}
   features <- Filter(f=has_elements, x=features)
   labels <- names(features)
