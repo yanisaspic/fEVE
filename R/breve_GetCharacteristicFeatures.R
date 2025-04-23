@@ -10,9 +10,9 @@ get_differential_expression <- function(filtered_dataset, groups) {
   #' Its rows are features and its columns are samples.
   #' @param groups an ordered vector of integers.
   #'
-  #' @import edgeR
-  #'
   #' @return a data.frame associating genes to their log2 fold change and FDR.
+  #'
+  #' @import edgeR
   #'
   tmp <- edgeR::DGEList(counts=filtered_dataset, group=groups)
   tmp <- edgeR::estimateDisp(tmp)
@@ -52,5 +52,5 @@ breve_GetCharacteristicFeatures <- function(cluster, selected_data, params,
   tmp <- tmp[(abs(tmp$logFC)>logFC_threshold) & (tmp$FDR<pvalue_threshold),]
   markers <- stats::setNames(tmp$logFC, rownames(tmp))
   markers <- markers[order(-markers)]
-  return(characteristic_features)
+  return(markers)
 }
