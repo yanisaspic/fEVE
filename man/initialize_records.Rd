@@ -4,11 +4,13 @@
 \alias{initialize_records}
 \title{Get a named list, with four data.frames: \code{samples}, \code{features}, \code{meta} and \code{methods}.}
 \usage{
-initialize_records(dataset_init)
+initialize_records(dataset_init, init_population)
 }
 \arguments{
 \item{dataset_init}{a dataset, without selected features.
 Its rows are features and its columns are samples.}
+
+\item{init_population}{a character (without \code{.}).}
 }
 \value{
 a named list, with four data.frames: \code{samples}, \code{features}, \code{meta} and \code{methods}.

@@ -4,7 +4,13 @@
 \alias{feve}
 \title{Conduct a clustering analysis with the fEVE framework, starting from the initial population C.}
 \usage{
-feve(dataset_init, params, figures = TRUE, sheets = TRUE)
+feve(
+  dataset_init,
+  params,
+  figures = TRUE,
+  sheets = TRUE,
+  init_population = "C"
+)
 }
 \arguments{
 \item{dataset_init}{a dataset, without selected features.
@@ -15,6 +21,8 @@ Its rows are features and its columns are samples.}
 \item{figures}{a boolean that indicates if figures should be drawn to explain the clustering recursion.}
 
 \item{sheets}{a boolean that indicates if the results of the clustering recursion should be saved in Excel sheets.}
+
+\item{init_population}{a character (without \code{.}).}
 }
 \value{
 a named list, with two elements: \code{records} and \code{preds}.

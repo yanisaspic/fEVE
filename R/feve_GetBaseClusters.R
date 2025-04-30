@@ -118,7 +118,7 @@ use_kMeans <- function(filtered_dataset, params) {
   return(predictions)
 }
 
-breve_GetBaseClusters <- function(selected_data, params,
+feve_GetBaseClusters <- function(selected_data, params,
                                     clustering_methods=c("NEMO", "PINS", "SNF", "kMeans")) {
   #' Apply multiple clustering methods on an -omics dataset to predict base clusters.
   #'

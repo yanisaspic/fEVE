@@ -1,8 +1,8 @@
-"Functions called to set-up the data of a brEVE clustering recursion.
+"Functions called to set-up the data of a fEVE clustering recursion.
 
 	2025/03/18 @yanisaspic"
 
-breve_GetSelectedFeatures <- function(dataset, params, n_features=1000) {
+feve_GetSelectedFeatures <- function(dataset, params, n_features=1000) {
   #' Get the variable features in an -omics dataset.
   #'
   #' The variable features have a variance superior to 0.
@@ -12,7 +12,7 @@ breve_GetSelectedFeatures <- function(dataset, params, n_features=1000) {
   #' @param params a list of parameters (cf. `feve::get_parameters()`).
   #' @param n_features the number of highly variable features to sample.
   #'
-  #' @return a vector of genes.
+  #' @return a vector of features.
   #' 
   #' @import stats
   #' 

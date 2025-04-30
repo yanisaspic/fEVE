@@ -177,13 +177,13 @@ dataset_init <- data$dataset
 params <- get_parameters("scEVE")
 
 population <- "C"
-records <- initialize_records(dataset_init)
+records <- initialize_records(dataset_init, population)
 SeuratObject_init <- get_SeuratObject_init(dataset_init)
 ```
 
 `SeuratObject.init` will be used to draw some plots during the clustering analysis.
 `population` is used to indicate which pool of samples fEVE should attempt to divide during its clustering recursion.
-The first recursion is always conducted on the the population `C`, which corresponds to all the samples of the dataset.
+The first recursion is always conducted on a manually labeled population (by default `C`), which corresponds to all the samples of the dataset.
 **Note** that `records` is the variable used to **store the results of each clustering recursion**; it is initialized at the start of the framework, and is enriched progressively.
 
 ### Overview of a clustering recursion
@@ -483,7 +483,7 @@ It is called by `get_characterized_clusters()`, and it expects three positional 
 It outputs a list where every element is a pool of samples.
 The elements are named lists, with six names: `base_clusters`, `samples`, `clustering_methods`, `label`, `features` and `robustness`.
 
-In the scEVE instance, it is set to `sceve_GetCharacterizedClusters()`, and a characteristic feature threshold is used to identify characterized clusters, with threshold=10.
+In the scEVE instance, it is set to `feve_GetCharacterizedClusters()`, and a characteristic feature threshold is used to identify characterized clusters, with threshold=10.
 
 ```{r params$characterized_clusters_strategy}
 print(params$characterized_clusters_strategy)

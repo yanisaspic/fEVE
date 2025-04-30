@@ -56,7 +56,8 @@ get_samples_of_population <- function(population, records.samples) {
   #' @export
   #'
 
-  if (population=="C") {return(rownames(records.samples))}
+  init_population <- colnames(records.samples)[1]
+  if (population==init_population) {return(rownames(records.samples))}
   # all samples belong to the root population
 
   cell_is_in_population <- function(cell_membership) {
@@ -100,8 +101,11 @@ get_leaf_clusters <- function(records.samples) {
   #'
   #' @import stats
   #'
+  #' @export
+  #'
   if (ncol(records.samples)==1) {
-    leaf_clusters <- stats::setNames(object=rep("C", nrow(records.samples)), nm=rownames(records.samples))
+    init_population <- colnames(records.samples)[1]
+    leaf_clusters <- stats::setNames(object=rep(init_population, nrow(records.samples)), nm=rownames(records.samples))
     leaf_clusters <- leaf_clusters[order(names(leaf_clusters))]
     return(leaf_clusters)}
 

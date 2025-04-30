@@ -67,7 +67,8 @@ get_strong_similarities <- function(associations) {
 
   get_id_row <- function(row) {
     elements <- sort(row[c("A", "C")])
-    id <- paste(elements, collapse=".")}
+    id <- paste(elements, collapse=".")
+    return(id)}
   ids <- apply(X=associations, MARGIN=1, FUN=get_id_row)
 
   strong_similarities <- associations[duplicated(ids),]
