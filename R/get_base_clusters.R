@@ -20,9 +20,7 @@ draw_base_clusters <- function(selected_SeuratObject, base_clusters) {
   #'
   #' @export
   #'
-  get_number <- function(renamed_cluster){
-    number <- strsplit(renamed_cluster, split="_")[[1]][2]
-  }
+  get_number <- function(renamed_cluster) {strsplit(renamed_cluster, split="_")[[1]][2]}
   base_clusters <- apply(base_clusters, c(1,2), get_number)
 
   get_plot_method <- function(method) {

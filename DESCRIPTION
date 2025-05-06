@@ -1,6 +1,6 @@
 Package: feve
 Title: An Alternative Framework to -Omics Ensemble Clustering
-Version: 1.0
+Version: 1.1.2
 Authors@R: 
     person("Yanis", "Asloudj", , "yanis.asloudj@u-bordeaux.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0003-5440-6268"))
@@ -21,9 +21,11 @@ Imports:
     assertthat,
     bluster,
     clues,
+    cluster,
     colorspace,
     densitycut,
     dplyr,
+    edgeR,
     forcats,
     ggplot2,
     ggplotify,
@@ -34,11 +36,15 @@ Imports:
     gridExtra,
     igraph,
     monocle3,
+    NEMO,
     openxlsx,
+    pals,
     patchwork,
+    PINSPlus,
     qpdf,
     R.utils,
     rlang,
+    scales,
     scater,
     SCpubr,
     scran,
@@ -48,6 +54,7 @@ Imports:
     SeuratWrappers,
     SHARP,
     SingleCellExperiment,
+    SNFtool,
     SummarizedExperiment,
     tidytree,
     TMExplorer,
