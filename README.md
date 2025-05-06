@@ -4,9 +4,9 @@ fEVE is an alternative approach to integrate multiple clustering results, genera
 
 Currently, two instances of the fEVE framework have been implemented:
 
--   **scEVE:** an instance that analyzes single-cell transcriptomics datasets, using four clustering methods. Each
+-   **scEVE:** an instance that analyzes single-cell transcriptomics datasets, using four clustering methods. An in-depth justification of our methodological choices is available in the scEVE Method paper (in press).
 
--   **brEVE:** an instance that analyzes bulk transcriptomics datasets, using four clustering methods.
+-   **brEVE:** an instance that analyzes bulk transcriptomics datasets, using four clustering methods. A brief overview of our methodological choices is available in the fEVE Application Notes paper (in writing).
 
 ## Installation
 
