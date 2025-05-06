@@ -2,7 +2,7 @@
 
 	2025/03/18 @yanisaspic"
 
-feve_GetSelectedFeatures <- function(dataset, params, n_features=1000) {
+feve_GetSelectedFeatures <- function(dataset, params, features_percent=0.25) {
   #' Get the variable features in an -omics dataset.
   #'
   #' The variable features have a variance superior to 0.
@@ -10,14 +10,17 @@ feve_GetSelectedFeatures <- function(dataset, params, n_features=1000) {
   #' @param dataset an -omics dataset.
   #' Its rows are features and its columns are samples.
   #' @param params a list of parameters (cf. `feve::get_parameters()`).
-  #' @param n_features the number of highly variable features to sample.
+  #' @param features_percent the proportion of highly variable features to select
+  #' (according to the initial pool of features).
   #'
   #' @return a vector of features.
-  #' 
+  #'
   #' @import stats
-  #' 
+  #'
   #' @export
   #'
+  n_features_init <- nrow(dataset)
+  n_features <- round(n_features_init * features_percent)
   variances <- apply(X=dataset, MARGIN=1, FUN=stats::var, na.rm=TRUE)
   means <- apply(X=dataset, MARGIN=1, FUN=mean, na.rm=TRUE)
   dispersions <- variances / means

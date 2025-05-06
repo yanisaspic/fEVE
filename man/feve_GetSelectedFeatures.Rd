@@ -4,7 +4,7 @@
 \alias{feve_GetSelectedFeatures}
 \title{Get the variable features in an -omics dataset.}
 \usage{
-feve_GetSelectedFeatures(dataset, params, n_features = 1000)
+feve_GetSelectedFeatures(dataset, params, features_percent = 0.25)
 }
 \arguments{
 \item{dataset}{an -omics dataset.
@@ -12,7 +12,8 @@ Its rows are features and its columns are samples.}
 
 \item{params}{a list of parameters (cf. \code{feve::get_parameters()}).}
 
-\item{n_features}{the number of highly variable features to sample.}
+\item{features_percent}{the proportion of highly variable features to select
+(according to the initial pool of features).}
 }
 \value{
 a vector of features.
