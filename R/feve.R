@@ -31,7 +31,7 @@ get_parameters <- function(params_label) {
                           selected_features_strategy=sceve_GetSelectedFeatures,
                           base_clusters_strategy=sceve_GetBaseClusters,
                           characteristic_features_strategy=sceve_GetCharacteristicFeatures,
-                          characterized_clusters_strategy=feve_GetCharacterizedClusters,
+                          characterized_clusters_strategy=sceve_GetCharacterizedClusters,
                           cluster_memberships_strategy=feve_HardClustering)
 
   # brEVE for bulk transcriptomics data ________________________________________
