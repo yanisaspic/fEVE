@@ -38,6 +38,8 @@ get_maximum_resolution <- function(records.samples) {
   #'
   #' @return an integer.
   #'
+  #' @export
+  #'
   populations <- colnames(records.samples)
   resolutions <- sapply(X=populations, FUN=get_resolution)
   maximum_resolution <- max(resolutions)
@@ -137,7 +139,9 @@ get_leaf_clusters.resolution <- function(resolution, records.samples) {
   #'
   #' @return a named vector associating samples to their most informative cluster labels, at a given maximum resolution.
   #'
-  data.resolution <- records.samples[, get_populations_at_resolution(resolution, records.samples)]
+  #' @export
+  #'
+  data.resolution <- records.samples[, get_populations_at_resolution(resolution, records.samples), drop=FALSE]
   leaf_clusters.resolution <- get_leaf_clusters(data.resolution)
   return(leaf_clusters.resolution)
 }
