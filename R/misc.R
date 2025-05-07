@@ -55,7 +55,6 @@ get_samples_of_population <- function(population, records.samples) {
   #'
   #' @export
   #'
-
   init_population <- colnames(records.samples)[1]
   if (population==init_population) {return(rownames(records.samples))}
   # all samples belong to the root population

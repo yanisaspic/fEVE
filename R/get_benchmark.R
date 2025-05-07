@@ -35,8 +35,6 @@ get_intrinsic_clustering_metrics <- function(dataset, preds) {
   #'
   #' @import bluster
   #'
-  #' @export
-  #'
   n_clusters_predicted <- length(unique(preds))
   if (n_clusters_predicted < 2) {return(c("nPurity"=NA, "SI"=NA))}
   data_bluster <- get_data_bluster(dataset)
@@ -64,6 +62,8 @@ get_clustering_metrics <- function(data, preds) {
   #' @return a named vector with four names: `ARI`, `NMI`, `nPurity` and `SI`.
   #'
   #' @import aricode
+  #'
+  #' @export
   #'
   if (length(preds) < 2) {return(c("ARI"=NA, "NMI"=NA, "nPurity"=NA, "SI"=NA))}
   ground_truth <- data$ground_truth[names(preds)]
