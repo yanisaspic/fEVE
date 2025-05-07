@@ -35,6 +35,8 @@ get_intrinsic_clustering_metrics <- function(dataset, preds) {
   #'
   #' @import bluster
   #'
+  #' @export
+  #'
   n_clusters_predicted <- length(unique(preds))
   if (n_clusters_predicted < 2) {return(c("nPurity"=NA, "SI"=NA))}
   data_bluster <- get_data_bluster(dataset)
