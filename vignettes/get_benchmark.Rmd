@@ -19,8 +19,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-To investigate how the results of a fEVE instance are impacted by the parameters used, a benchmark can be conducted easily.
-We will demonstrate how by using the scEVE instance, an instance dedicated to the analysis of scRNA-seq datasets.
+# On-demand benchmark
+
+To investigate how the results of a fEVE instance are impacted by the parameters used, benchmark experiments can be conducted easily.
+In this vignette, we demonstrate how. We will employ the scEVE instance, an instance dedicated to the analysis of scRNA-seq datasets.
 
 ```{r feve}
 library(feve)
@@ -66,3 +68,11 @@ Here, with the dataset `Darmanis_HumGBM`, we see that both `scEVE` and `scEVE*` 
 It would indicate that, on this dataset, the molecular signal of the clusters predicted with the fEVE framework are more cohesive than the molecular signal of the clusters proposed by the authors.
 
 Regardless of this specific outcome, we expect developers to take full advantage of this open framework and its on-demand benchmark to explore and evaluate different instances of our original ensemble framework.
+
+# Session information
+
+```{r sessioninfo}
+library(sessioninfo)
+sessioninfo::session_info()
+```
+

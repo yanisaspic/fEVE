@@ -5,7 +5,7 @@
 \title{Using computational as well as intrinsic and extrinsic clustering metrics, measure
 the performance of an instance of the fEVE framework on a dataset.}
 \usage{
-get_benchmark(data, params, method_label)
+get_benchmark(data, params, method_label = "fEVE")
 }
 \arguments{
 \item{data}{a named list with two elements: \code{dataset} and \code{ground_truth}.

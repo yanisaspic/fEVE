@@ -46,10 +46,8 @@ After analyzing the data, Darmanis *et al.* were able to identify 7 unique cell 
 
 ```{r dataset}
 data <- sceve_LoadData("Darmanis_HumGBM")
-dataset_init <- data$dataset
-ground_truth <- data$ground_truth
-dim(dataset_init)
-unique(ground_truth)
+dim(data$dataset)
+unique(data$ground_truth)
 ```
 
 The loaded `data` include the scRNA-seq expression matrix `dataset`, and the cell types identified by Darmanis *et al.* `ground_truth`.
@@ -65,7 +63,7 @@ Afterwards, the entire clustering analysis can be conducted by calling the funct
 
 ```{r run}
 params <- get_parameters("scEVE")
-results <- feve(dataset_init, params=params)
+results <- feve(data$dataset, params=params)
 ```
 
 The results of the `feve()` function is a list with two elements: `records` and `preds`.
@@ -123,15 +121,18 @@ Basically, the type of output you would get from using any clustering method.
 
 We can see that the cell `Immune cell_1834` was assigned to the cluster `C.3`, whereas the cell `Neoplastic_233` was assigned to the cluster `C.L.L.L`.
 
-Finally, a summary figure can be drawn, with the `get_summary_plot()` function.
+Finally, a summary figure can be drawn, with the `get_plot_summary()` function.
 Due to limitation in space, it might appear squashed in the vignette.
 
-```{r get_summary_plot}
-p <- get_summary_plot(results$records)
+```{r get_plot_summary}
+p <- get_plot_summary(results$records)
 p
 ```
 
 The plot is composed of 3 elements (from left to right): a tree representing the different resolutions of clusters, a middle barplot representing the sizes of the most informative clusters, and a right barplot representing the number of characteristic features (and the most characteristic feature) of these clusters.
+
+Other types of summary figures can be drawn to monitor the clustering analysis.
+We discuss about these figures extensively in another vignette, `summary.Rmd`.
 
 ### Parameters of a fEVE clustering analysis
 
@@ -146,7 +147,6 @@ The function `feve()` has 3 supplementary arguments:
 By default, the function `get_parameters()` is called to to get an instance of the fEVE framework.
 
 ```{r parameters}
-params <- get_parameters("scEVE")
 names(params)
 ```
 
@@ -172,16 +172,12 @@ First, we need to define some supplementary variables.
 They are defined prior to the first clustering recursion, when `feve()` is called.
 
 ```{r init}
-data <- sceve_LoadData("Darmanis_HumGBM")
-dataset_init <- data$dataset
-params <- get_parameters("scEVE")
-
 population <- "C"
-records <- initialize_records(dataset_init, population)
-SeuratObject_init <- get_SeuratObject_init(dataset_init)
+records <- initialize_records(data$dataset, population)
+SeuratObject_init <- get_SeuratObject_init(data$dataset)
 ```
 
-`SeuratObject.init` will be used to draw some plots during the clustering analysis.
+`SeuratObject_init` will be used to draw some plots during the clustering analysis.
 `population` is used to indicate which pool of samples fEVE should attempt to divide during its clustering recursion.
 The first recursion is always conducted on a manually labeled population (by default `C`), which corresponds to all the samples of the dataset.
 **Note** that `records` is the variable used to **store the results of each clustering recursion**; it is initialized at the start of the framework, and is enriched progressively.
@@ -220,8 +216,8 @@ With scEVE, 1,000 highly variable genes are selected.\
 The function `get_selected_data()` is called to extract a specific pool of samples, as well as their selected features.
 
 ```{r get_selected_data}
-selected_data <- get_selected_data(population, dataset_init, SeuratObject_init, records, params, figures=FALSE)
-dim(dataset_init)
+selected_data <- get_selected_data(population, data$dataset, SeuratObject_init, records, params, figures=FALSE)
+dim(data$dataset)
 dim(selected_data$dataset)
 ```
 
@@ -395,7 +391,7 @@ Because `C.2` had a robustness of 0.40, in this new recursion, robust clusters w
 A complete clustering analysis can also be resumed thanks to the `resume_feve()` function and the `records` variable updated at the previous recursions.
 
 ```{r resume_feve}
-results <- resume_feve(dataset_init, records, params, figures=FALSE, sheets=FALSE)
+results <- resume_feve(data$dataset, records, params, figures=FALSE, sheets=FALSE)
 ```
 
 Eventually, fEVE won't be able to identify robust clusters, and the `clustering_status` of every predicted population will be set to `DONE`.
@@ -432,7 +428,7 @@ We see that `n_genes=1000`, but we can easily select a different number of varia
 ```{r get_selected_data bis}
 f <- function(dataset, params) {sceve_GetSelectedFeatures(dataset, params, n_features=2000)}
 params$selected_features_strategy <- f
-tmp <- get_selected_data(population="C", dataset_init, SeuratObject_init, records, params, figures=FALSE)
+tmp <- get_selected_data(population="C", data$dataset, SeuratObject_init, records, params, figures=FALSE)
 dim(tmp$dataset)
 ```
 
@@ -448,7 +444,7 @@ We illustrate this property by defining a new function that selects 1,000 featur
 set.seed(1)
 g <- function(dataset, params) {sample(rownames(dataset), size=1000)}
 params$selected_features_strategy <- g
-tmp <- get_selected_data("C", dataset_init, SeuratObject_init, records, params, figures=FALSE)
+tmp <- get_selected_data("C", data$dataset, SeuratObject_init, records, params, figures=FALSE)
 dim(tmp$dataset)
 ```
 

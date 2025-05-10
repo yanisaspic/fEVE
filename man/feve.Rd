@@ -27,7 +27,7 @@ Its rows are features and its columns are samples.}
 \value{
 a named list, with two elements: \code{records} and \code{preds}.
 \code{records} is a named list, with four data.frames: \code{samples}, \code{features}, \code{meta} and \code{methods}.
-\code{preds} is a named factor associating samples to their predicted clusters.
+\code{preds} is a named vector associating samples to their predicted clusters.
 }
 \description{
 Conduct a clustering analysis with the fEVE framework, starting from the initial population C.

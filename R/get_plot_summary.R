@@ -1,13 +1,13 @@
-"Functions called to draw the summary figure of a clustering analysis.
+"Function called to draw the summary figure of a clustering analysis.
 
-	2025/02/24 @yanisaspic"
+	2025/05/09 @yanisaspic"
 
 get_tree_data <- function(records_meta) {
   #' Get a data structure representing the hierarchy of clusters predicted.
   #' The robustness of each cluster is also included.
   #' The resulting data structure is suitable for `ggtree::ggtree()`.
   #'
-  #' @param records_meta associating predicted populations to generic information, including:
+  #' @param records_meta a data.frame associating predicted populations to generic information, including:
   #' their `size`, their `robustness`, their `parent` and their `clustering_status`.
   #'
   #' @return a data structure suitable for `ggtree::ggtree()`.
@@ -15,6 +15,7 @@ get_tree_data <- function(records_meta) {
   #' @import dplyr
   #' @import ggplot2
   #' @import ggtree
+  #' @import tibble
   #' @import tidytree
   #'
   relationships <- data.frame(parent=records_meta[-1,]$parent, node=rownames(records_meta[-1,]))
@@ -63,7 +64,7 @@ get_cluster_sizes <- function(records_samples) {
   #' Get a data.frame associating each cluster to its size.
   #'
   #' @param records_samples a data.frame associating samples to their predicted populations.
-  #' Its rows are samples and and its columns are population. The cell values range from 0 to 1.
+  #' Its rows are samples and its columns are population. The cell values range from 0 to 1.
   #'
   #' @return a data.frame with two columns: `cluster` and `n`.
   #'
@@ -82,7 +83,7 @@ get_barplot_sizes <- function(tree_data, records_samples) {
   #'
   #' @param tree_data a data structure suitable for `ggtree::ggtree()`.
   #' @param records_samples a data.frame associating samples to their predicted populations.
-  #' Its rows are samples and and its columns are population. The cell values range from 0 to 1.
+  #' Its rows are samples and its columns are population. The cell values range from 0 to 1.
   #'
   #' @return a plot.
   #'
@@ -161,7 +162,7 @@ get_barplot_features <- function(tree_data, records_features) {
   return(plot)
 }
 
-get_summary_plot <- function(records, widths=c(8, 4, 4)) {
+get_plot_summary <- function(records, widths=c(8, 4, 4)) {
   #' Get a composite plot summarizing a fEVE clustering analysis.
   #' The composite reports the relationships, as well as the sizes and the markers of the leaf clusters.
   #'
@@ -194,108 +195,6 @@ get_summary_plot <- function(records, widths=c(8, 4, 4)) {
   composite_plot <- tree_plot +
     remove_y_axis(barplot_sizes) +
     remove_y_axis(barplot_features) +
-    patchwork::plot_layout(widths=widths, guides="collect") &
-    ggplot2::theme(legend.position="bottom")
-
-  composite_plot <- composite_plot +
-    patchwork::plot_annotation(tag_levels="a")
-  return(composite_plot)
-}
-
-get_cluster_compositions <- function(ground_truth, records_samples) {
-  #' Get a data.frame associating each cluster to its class composition,
-  #' according to some ground truth.
-  #'
-  #' @param ground_truth a named factor associating samples to their ground truth label.
-  #' @param records_samples a data.frame associating samples to their predicted populations.
-  #' Its rows are samples and and its columns are populations. The cell values range from 0 to 1.
-  #'
-  #' @return a data.frame with three columns: `cluster`, `sample_class` and `n`.
-  #'
-  get_ground_truth <- function(sample_id) {ground_truth[sample_id]}
-
-  get_cluster_comp <- function(cluster) {
-    samples_of_cluster <- feve::get_samples_of_population(cluster, records_samples)
-    labels <- sapply(X=samples_of_cluster, FUN=get_ground_truth)
-    tmp <- table(labels)
-    cluster_comp <- data.frame(cluster=cluster, sample_type=names(tmp), n=as.numeric(tmp))
-    return(cluster_comp)}
-
-  cluster_compositions <- lapply(X=colnames(records_samples), FUN=get_cluster_comp)
-  cluster_compositions <- do.call(rbind, cluster_compositions)
-  return(cluster_compositions)
-}
-
-get_barplot_compositions <- function(tree_data, ground_truth, records_samples) {
-  #' Get a barplot associating each leaf cluster to its sample composition.
-  #'
-  #' @param tree_data a data structure suitable for `ggtree::ggtree()`.
-  #' @param ground_truth a named factor associating samples to their ground truth label.
-  #' @param records_samples a data.frame associating samples to their predicted populations.
-  #' Its rows are samples and and its columns are populations. The cell values range from 0 to 1.
-  #'
-  #' @return a plot.
-  #'
-  #' @import ggplot2
-  #' @import pals
-  #' @import scales
-  #'
-  leaves <- tree_data[tree_data$isTip, ]
-  alignment <- leaves$label[order(leaves$y)]
-  cluster_compositions <- get_cluster_compositions(ground_truth, records_samples)
-  cluster_compositions <- cluster_compositions[cluster_compositions$cluster %in% leaves$label, ]
-  n_sample_types <- length(unique(cluster_compositions$sample_type))
-
-  plot <- ggplot2::ggplot(data=cluster_compositions) +
-    ggplot2::geom_bar(ggplot2::aes(x=factor(cluster, levels=alignment), y=n, fill=sample_type),
-                      position="fill", stat="identity", color="black") +
-    ggplot2::scale_y_continuous(expand=ggplot2::expansion(mult=0), labels=scales::percent) +
-    ggplot2::scale_fill_manual(values=pals::kelly(n_sample_types)) +
-    ggplot2::coord_flip()
-
-  n_rows_legend <- ceiling(n_sample_types / 7)
-  plot <- plot +
-    ggplot2::theme_classic() +
-    ggplot2::ylab("sample types") +
-    ggplot2::guides(fill=ggplot2::guide_legend(nrow=n_rows_legend))
-  return(plot)
-}
-
-get_ground_truth_plot <- function(records, ground_truth, widths=c(8, 4, 4)) {
-  #' Get a composite plot summarizing a scEVE clustering analysis on a dataset with a ground truth.
-  #' The composite reports the relationships, the cell composition and the size of every leaf cluster
-  #' predicted by scEVE.
-  #'
-  #' @param records a named list, with four data.frames: `samples`, `features`, `meta` and `methods`.
-  #' @param ground_truth a named factor associating samples to their class.
-  #' @param widths a vector of numeric.
-  #'
-  #' @return a composite plot.
-  #'
-  #' @import ggplot2
-  #' @import patchwork
-  #'
-  #' @export
-  #'
-  tree_data <- get_tree_data(records$meta)
-  tree_plot <- get_tree_plot(tree_data)
-  tree_plot <- tree_plot +
-    ggplot2::theme(plot.margin=ggplot2::unit(c(0, 0, 0, 0), "null")) +
-    ggplot2::guides(fill="none", color="none")
-
-  remove_y_axis <- function(barplot) {
-    barplot <- barplot +
-      ggplot2::theme(axis.line.y=ggplot2::element_blank(),
-                     axis.title.y=ggplot2::element_blank(),
-                     axis.text.y=ggplot2::element_blank())
-    return(barplot)}
-
-  barplot_compositions <- get_barplot_compositions(tree_data, ground_truth, records$samples)
-  barplot_sizes <- get_barplot_sizes(tree_data, records$samples)
-
-  composite_plot <- tree_plot +
-    remove_y_axis(barplot_compositions) +
-    remove_y_axis(barplot_sizes) +
     patchwork::plot_layout(widths=widths, guides="collect") &
     ggplot2::theme(legend.position="bottom")
 

@@ -1,4 +1,4 @@
-"Functions called to predict marker features.
+"Functions called to predict marker features in a bulk RNA-seq dataset.
 
 	2025/03/05 @yanisaspic"
 
