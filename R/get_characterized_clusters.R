@@ -58,14 +58,15 @@ get_characterized_clusters <- function(population, robust_clusters, selected_dat
     cluster[["features"]] <- params$characteristic_features_strategy(cluster, selected_data, params)
     return(cluster)}
   robust_clusters <- lapply(X=robust_clusters, FUN=add_features)
+
   characterized_clusters <- params$characterized_clusters_strategy(robust_clusters, selected_data, params)
-
   if (length(characterized_clusters) == 0) {return(list())}
-  clusters <- add_leftover_cluster(population, characterized_clusters, selected_data, params)
 
+  clusters <- add_leftover_cluster(population, characterized_clusters, selected_data, params)
   if (length(clusters) == 2) {
     characterized_clusters <- params$characterized_clusters_strategy(clusters, selected_data, params)
     if (length(characterized_clusters) < 2) {return(list())}}
+  # if there is a single robust cluster and the leftovers, both must be differentially characterized to be counted.
 
   if (figures) {
     plot <- draw_characteristic_features(clusters)
@@ -94,8 +95,8 @@ generate_color_scale <- function(labels){
     tmp <- strsplit(label, split=".", fixed=TRUE)[[1]]
     tail <- tmp[length(tmp)]
     return(tail)}
-  is_not_leftover <- function(label) {get_tail(label) != "L"}
-  robust_labels <- labels[sapply(X=labels, FUN=is_not_leftover)]
+  is_leftover <- function(label) {substr(label, nchar(label), nchar(label))=="L"}
+  robust_labels <- labels[!sapply(X=labels, FUN=is_not_leftover)]
   n <- get_tail(robust_labels[length(robust_labels)])
   #_____________________________________________________________________________
 
@@ -114,7 +115,7 @@ generate_color_scale <- function(labels){
   get_index <- function(label) {as.numeric(get_tail(label))}
   robust_indexes <- sapply(X=robust_labels, FUN=get_index)
   colors <- colors[robust_indexes]
-  if (!is_not_leftover(labels[length(labels)])) {colors <- c(colors, "#404040FF")}
+  if (is_leftover(labels[length(labels)])) {colors <- c(colors, "#404040FF")}
   #_____________________________________________________________________________
 
   names(colors) <- labels

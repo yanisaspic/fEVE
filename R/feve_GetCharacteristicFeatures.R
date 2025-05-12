@@ -18,7 +18,7 @@ get_differential_feature <- function(feature, filtered_dataset, groups) {
   outgroup_feature <- as.numeric(filtered_dataset[feature, !groups])
   logfc <- log2(mean(ingroup_feature) / mean(outgroup_feature))
   pval <- stats::wilcox.test(ingroup_feature, outgroup_feature)$p.value
-  result <- data.frame(feaure=feature, logFC=logfc, pval=pval)
+  result <- data.frame(feature=feature, logFC=logfc, pval=pval)
   return(result)
 }
 

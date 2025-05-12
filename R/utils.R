@@ -133,6 +133,7 @@ get_samples_of_population <- function(population, records_samples) {
     main_population <- names(which.max(cell_membership))
     is_in_population <- (main_population == population) &
       (max_membership > 0)
+    return(is_in_population)
   }
 
   resolution <- get_resolution(population)

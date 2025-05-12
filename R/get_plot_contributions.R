@@ -44,9 +44,7 @@ get_heatmap_contributions <- function(records_methods) {
 
   plot <- ggplot2::ggplot(data) +
     ggplot2::geom_tile(ggplot2::aes(x=cluster, y=method, fill=value), color="white", linewidth=1) +
-    ggplot2::scale_fill_gradient(low="#EBEBEB", high="#0072B2", limits=c(0,1)) +
-    ggplot2::scale_x_discrete(expand=ggplot2::expansion(mult=0.11)) +
-    ggplot2::scale_y_discrete(expand=ggplot2::expansion(mult=0.18))
+    ggplot2::scale_fill_gradient(low="#EBEBEB", high="#0072B2", limits=c(0,1))
 
   plot <- plot + ggplot2::theme_classic() +
     ggplot2::theme(legend.position="none",
