@@ -118,11 +118,11 @@ get_cluster_features <- function(records_features) {
   #' @return a data.frame with three columns: `cluster`, `n` and `names`.
   #'
   get_cluster_features <- function(cluster) {
-    tmp <- records_features[records_features[, cluster] > 0,]
+    tmp <- records_features[records_features[, cluster] != 0,]
     if (nrow(tmp) == 0) {
         cluster_features <- data.frame(cluster=cluster, n=0, label=NA)
         return(cluster_features)}
-    tmp <- tmp[order(tmp[, cluster], decreasing=TRUE), ]
+    tmp <- tmp[order(abs(tmp[, cluster]), decreasing=TRUE), ]
     cluster_features <- data.frame(cluster=cluster, n=nrow(tmp), label=rownames(tmp)[1])
     return(cluster_features)}
 
