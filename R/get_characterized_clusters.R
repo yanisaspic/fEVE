@@ -96,7 +96,7 @@ generate_color_scale <- function(labels){
     tail <- tmp[length(tmp)]
     return(tail)}
   is_leftover <- function(label) {substr(label, nchar(label), nchar(label))=="L"}
-  robust_labels <- labels[!sapply(X=labels, FUN=is_not_leftover)]
+  robust_labels <- labels[!sapply(X=labels, FUN=is_leftover)]
   n <- get_tail(robust_labels[length(robust_labels)])
   #_____________________________________________________________________________
 
