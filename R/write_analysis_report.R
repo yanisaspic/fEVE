@@ -41,7 +41,7 @@ get_placeholder_ground_truth <- function(records, random_state=1) {
   return(ground_truth)
 }
 
-get_analysis_report <- function(dataset_init, records, ground_truth=NULL, path="./report.pdf") {
+write_analysis_report <- function(dataset_init, records, ground_truth=NULL, path="./report.pdf") {
   #' Save summary figures of an analysis in a .pdf file.
   #'
   #' @param dataset_init a dataset, without selected features.
