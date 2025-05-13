@@ -71,12 +71,12 @@ The composite plot generated with `get_plot_contributions()` is used to investig
 get_plot_contributions(results$records)
 ```
 
-### get_analysis_report.R
+### write_analysis_report.R
 
-You can call the function `get_analysis_report()` to save a copy of each plot presented in this vignette, in a single .pdf file.
+You can call the function `write_analysis_report()` to save a copy of each plot presented in this vignette, in a single .pdf file.
 
 ```{r get_analysis_report()}
-get_analysis_report(data$dataset, results$records, data$ground_truth)
+write_analysis_report(data$dataset, results$records, data$ground_truth)
 ```
 
 ### Miscellaneous

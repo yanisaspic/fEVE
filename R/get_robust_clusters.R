@@ -164,6 +164,31 @@ filter_conflicting_samples <- function(robust_clusters) {
   return(robust_clusters)
 }
 
+get_robustness_threshold <- function(population, base_clusters, records) {
+  #' Get the robustness threshold to identify robust clusters.
+  #'
+  #' @param population a character. It corresponds to the population that fEVE will attempt to cluster.
+  #' @param base_clusters a data.frame associating samples to their predicted clusters.
+  #' Its rows are samples, its columns are clustering methods, and predicted populations are reported in the table.
+  #' @param records a named list, with four data.frames: `samples`, `features`, `meta` and `methods`.
+  #'
+  #' @return a numeric.
+  #'
+  n_methods <- ncol(base_clusters)
+  clusters_for_majority <- floor(n_methods / 2 + 1)
+  edges_for_majority <- clusters_for_majority * (clusters_for_majority - 1) / 2
+  majority_robustness <- 0.5 * edges_for_majority / (n_methods * (n_methods - 1) / 2)
+
+  lineage_robustness <- records$meta[population, "robustness"]
+  parent <- records$meta[population, "parent"]
+  while (!is.na(parent)) {
+    lineage_robustness <- max(records$meta[parent, "robustness"], lineage_robustness)
+    parent <- records$meta[parent, "parent"]}
+
+  robustness_threshold <- max(majority_robustness, lineage_robustness)
+  return(robustness_threshold)
+}
+
 get_robust_clusters <- function(population, base_clusters, selected_data, records, params, figures) {
   #' Extract robust clusters and a leftover cluster from a set of base clusters predicted
   #' with multiple clustering methods.
@@ -193,13 +218,7 @@ get_robust_clusters <- function(population, base_clusters, selected_data, record
   strong_similarities <- get_strong_similarities(associations)
   subgraphs <- get_subgraphs(population, strong_similarities, base_clusters, params)
 
-  n_methods <- ncol(base_clusters)
-  clusters_for_majority <- floor(n_methods / 2 + 1)
-  edges_for_majority <- clusters_for_majority * (clusters_for_majority - 1) / 2
-  majority_robustness <- 0.5 * edges_for_majority / (n_methods * (n_methods - 1) / 2)
-  # minimum robustness expected if a majority of methods predict a similar cluster
-  robustness_threshold <- max(majority_robustness, records$meta[population, "robustness"])
-
+  robustness_threshold <- get_robustness_threshold(population, base_clusters, records)
   subgraph_is_robust_cluster <- function(subgraph) {subgraph$robustness > robustness_threshold}
   robust_clusters <- Filter(f=subgraph_is_robust_cluster, x=subgraphs)
   robust_clusters <- stats::setNames(robust_clusters, sapply(X=robust_clusters, FUN="[[", "label"))
