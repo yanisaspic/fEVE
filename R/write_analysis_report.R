@@ -18,8 +18,13 @@ get_plot_wrapper <- function(plot_label, data, records) {
   if (plot_label == "contributions") {plot <- get_plot_contributions(records)}
   if (plot_label == "resolutions") {plot <- get_plot_resolutions(data, records$samples)}
 
-  if (plot_label %in% c("summary", "compositions")) {dimensions <- list(width=16, height=9)}
-  if (plot_label %in% c("contributions", "resolutions")) {dimensions <- list(width=3.5, height=4)}
+  if (plot_label %in% c("summary", "compositions")) {
+    dimensions <- list(width=16, height=9)
+    if (get_maximum_resolution(records$samples) > 5) {
+      dimensions <- list(width=24, height=13.5)}}
+  if (plot_label %in% c("contributions", "resolutions")) {
+    dimensions <- list(width=3.5, height=4)}
+
   out <- list(plot=plot, dim=dimensions)
   return(out)
 }
