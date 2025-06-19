@@ -4,7 +4,7 @@ fEVE is an alternative approach to integrate multiple clustering results of -omi
 
 Currently, two instances of the fEVE framework have been implemented:
 
--   **scEVE:** a specialized instance that analyzes single-cell transcriptomics datasets, using four scRNA-seq clustering methods. An in-depth justification of our methodological choices is available in the scEVE Method paper (in press).
+-   **scEVE:** a specialized instance that analyzes single-cell transcriptomics datasets, using four scRNA-seq clustering methods. An in-depth justification of our methodological choices is available in the scEVE Method paper (https://doi.org/10.1093/nargab/lqaf073)
 
 -   **fEVE:** a generic instance that analyzes -omics datasets, using four data-agnostic clustering methods. A brief overview of our methodological choices is available in the fEVE Application Notes paper (in writing).
 
